@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cafeteria seats</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <a class="signout" id="signout" href="/logout" hidden>Sign out</a>
+      <p class="eyebrow">Live seat availability</p>
+      <h1>Cafeteria seats</h1>
+      <p class="sub" id="greeting">Finished eating? Free up your seat. Waiting? Tell us your group size and we'll alert you.</p>
+    </header>
+
+    <div class="error" id="error" role="alert" hidden></div>
+    <div class="conn" id="conn" role="status" hidden>Reconnecting… If this stays, reload the page.</div>
+
+    <div id="browse">
+    <section class="finder" aria-label="Find seats">
+      <div class="party">
+        <span class="label">Seats needed</span>
+        <div class="stepper">
+          <button id="party-minus" aria-label="Fewer seats">−</button>
+          <output id="party-n">2</output>
+          <button id="party-plus" aria-label="More seats">+</button>
+        </div>
+      </div>
+      <button class="primary find" id="find-seat">Find me a seat</button>
+      <button class="alert-toggle" id="alert-toggle" aria-pressed="false">Alert me when seats open</button>
+      <div class="summary" id="summary" aria-live="polite"></div>
+    </section>
+
+    <section class="meter" id="meter" role="img" aria-label="Cafeteria fullness">
+      <div class="meter-text"><span id="meter-mood"></span><span id="meter-pct" class="label"></span></div>
+      <div class="meter-bar" id="meter-bar" aria-hidden="true"></div>
+    </section>
+    <p class="hint" id="alert-consent" hidden>Tapping "Alert me when seats open" also lets us send you a message on Teams.</p>
+    <p class="hint" id="alert-hint" hidden>Alerts only work while this page is open. Keep it open in a tab while you wait.</p>
+
+    <div class="holdbar" id="holdbar" role="status" hidden></div>
+
+    <div class="legend" aria-hidden="true">
+      <span><i class="chair taken"></i> Taken</span>
+      <span><i class="chair free"></i> Free</span>
+      <span><i class="chair held"></i> Held for someone</span>
+    </div>
+    </div>
+
+    <p class="sub" id="loading">Loading tables…</p>
+
+    <section class="seated" id="seated" aria-live="polite" hidden>
+      <h2>Enjoy your meal!</h2>
+      <p id="seated-text"></p>
+    </section>
+
+    <div class="mapwrap" id="mapwrap">
+      <div class="partbar" id="partbar"></div>
+      <div class="map" id="map" role="group" aria-label="Cafeteria floor map">
+        <div class="fx windows">Windows</div>
+        <div class="fx brick">Brick wall</div>
+        <div class="fx kitchen">Serving counter and kitchen</div>
+        <div class="fx entrance">Entrance / exit</div>
+      </div>
+      <p class="hint" id="map-hint" hidden>Editing: drag a table to where it really is. It saves when you let go.</p>
+      <div class="picked" id="picked" aria-live="polite"></div>
+    </div>
+
+    <details class="setup" id="setup" hidden>
+      <summary>Set up tables</summary>
+
+      <div class="group">
+        <h3 class="label">Whole cafeteria</h3>
+        <div class="row">
+          <button id="edit-layout" aria-pressed="false">Move tables on map</button>
+          <button id="reset-all">Fill every seat</button>
+          <button id="free-all">Free every seat</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3 class="label">Camera</h3>
+        <div class="row">
+          <a class="btnlink" href="/calibrate.html">Mark camera seats</a>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3 class="label">Add a table</h3>
+        <div class="row">
+          <label>Name <input id="new-name" maxlength="30" placeholder="Table 9"></label>
+          <label>Seats
+            <select id="new-cap"></select>
+          </label>
+          <label>Shape
+            <select id="new-shape">
+              <option value="round">Round table</option>
+              <option value="square">Square table</option>
+              <option value="long">Long table</option>
+              <option value="booth">Booth sofa</option>
+              <option value="bar">High counter</option>
+              <option value="single">Single chair</option>
+            </select>
+          </label>
+          <label>Part
+            <select id="new-part"></select>
+          </label>
+          <button id="add-table">Add table</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3 class="label">Parts of the cafeteria</h3>
+        <ul id="part-list"></ul>
+        <div class="row">
+          <label>New part <input id="new-part-name" maxlength="30" placeholder="Part 4"></label>
+          <button id="add-part">Add part</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3 class="label">Labels on a part's page</h3>
+        <p class="hint">Mark areas such as the entrance, a lounge or a walkway. In "Move tables" you can drag a label and pull its corner to resize it.</p>
+        <ul id="area-list"></ul>
+        <div class="row">
+          <label>Label <input id="new-area-label" maxlength="30" placeholder="Lounge"></label>
+          <label>Kind
+            <select id="new-area-kind">
+              <option value="entrance">Entrance</option>
+              <option value="lounge">Lounge</option>
+              <option value="walkway">Walkway</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Part <select id="new-area-part"></select></label>
+          <button id="add-area">Add label</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3 class="label">Tables in the cafeteria</h3>
+        <ul id="setup-list"></ul>
+      </div>
+    </details>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>

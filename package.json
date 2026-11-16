@@ -1,0 +1,10 @@
+{
+  "name": "canteen-seats",
+  "version": "1.0.0",
+  "description": "Live canteen seat availability with holds and alerts",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED",
+  "private": true
+}

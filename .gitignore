@@ -1,0 +1,33 @@
+# Secrets and local settings: never commit
+.env
+
+# Runtime state (holds real email addresses and the live table layout)
+data/*
+!data/.gitkeep
+
+# Logs
+*.log
+*.err
+
+# Node
+node_modules/
+
+# Python (camera POC)
+poc-vision/.venv/
+poc-vision/__pycache__/
+*.pyc
+
+# Camera POC: downloaded model weights, generated results, scratch photos and search output
+poc-vision/models/*.onnx
+poc-vision/output/*
+!poc-vision/output/.gitkeep
+poc-vision/candidates*.json
+poc-vision/images/Gemini_Generated_Image_*
+public/camera/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp

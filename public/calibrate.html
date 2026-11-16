@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Camera seats · Cafeteria seats</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app calib">
+    <header>
+      <a class="signout" href="/">← Back to the map</a>
+      <p class="eyebrow">Admin · camera</p>
+      <h1>Camera seats</h1>
+      <p class="sub">Click each seat on the picture, where a seated person's chest would be. Pick the app table it belongs to, then save. The camera script uses these dots on every new picture.</p>
+    </header>
+
+    <details class="calib-tips" open>
+      <summary>How to mark seats well</summary>
+      <ul>
+        <li>Click the middle of a seated person's chest, not the chair seat or the legs.</li>
+        <li>One dot per chair. Mark every chair at a table the camera watches. A chair you skip keeps its old state.</li>
+        <li>Skip chairs you can't see clearly, such as ones hidden behind a pillar or too far away.</li>
+        <li>Keep the dot away from the person sitting next to the chair, or their box can wrongly mark the seat as taken.</li>
+        <li>After saving, run the camera script on a few pictures where you know who sits where, and compare them with the marked picture.</li>
+      </ul>
+    </details>
+
+    <div class="error" id="cal-error" role="alert" hidden></div>
+
+    <div class="row calib-bar">
+      <label>Next seat belongs to
+        <select id="cal-table"></select>
+      </label>
+      <button class="primary" id="cal-save">Save seats</button>
+      <button id="cal-clear">Remove all</button>
+      <output id="cal-status" aria-live="polite"></output>
+    </div>
+
+    <div class="calib-pic" id="cal-pic">
+      <img id="cal-img" src="/camera/reference.jpg" alt="Camera reference picture. Click a seat to mark it.">
+    </div>
+
+    <h2 class="calib-h">What the camera watches</h2>
+    <ul class="calib-cover" id="cal-cover"></ul>
+
+    <h2 class="calib-h">Marked seats</h2>
+    <ul class="calib-list" id="cal-list"></ul>
+    <p class="hint" id="cal-empty">No seats marked yet. Click on the picture.</p>
+  </div>
+  <script src="/calibrate.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+ "part": "p4",
+ "tables": {
+  "t78": {
+   "name": "Table A",
+   "seats": [
+    1
+   ]
+  },
+  "t79": {
+   "name": "Table B",
+   "seats": [
+    2,
+    3
+   ]
+  },
+  "t80": {
+   "name": "Table C",
+   "seats": [
+    4,
+    5,
+    6
+   ]
+  },
+  "t81": {
+   "name": "Table D",
+   "seats": [
+    7
+   ]
+  },
+  "t82": {
+   "name": "Table E",
+   "seats": [
+    8,
+    9
+   ]
+  }
+ }
+}
