@@ -25,6 +25,14 @@ poc-vision/candidates*.json
 poc-vision/images/Gemini_Generated_Image_*
 public/camera/
 
+# Video analysis: recordings of people and the occupancy logs made from them stay local
+poc-vision/videos/
+poc-vision/reports/
+*.mp4
+*.mov
+*.avi
+*.mkv
+
 # Editor and OS files
 .vscode/
 .idea/

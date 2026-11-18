@@ -1,6 +1,6 @@
 """Find the people in photos with YOLOX (Apache-2.0), running through OpenCV, and draw a box round each one.
 
-Usage:  python detect.py [model] [--tiles]    model = yolox_s (default) or yolox_tiny; --tiles also looks at the photo in pieces
+Usage:  python detect.py [model] [--tiles]    model = a name from MODELS below (yolox_s default, yolox_tiny, yolox_m); --tiles also looks at the photo in pieces
         python detect.py yolox_s images/photo1.jpg images/photo2.jpg
 
 Writes boxed pictures to output/ and the counts and box positions to output/detections_<model>.json.
@@ -16,7 +16,16 @@ import cv2
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-INPUT_SIZE = {"yolox_s": 640, "yolox_tiny": 416}  # the size each model was trained at
+# The models we can use. name -> file in models/, the size it was trained at, and which decoder reads its output.
+# To add another YOLOX size (for example yolox_l), put its .onnx in models/ and add one line here.
+# A model with a different output format (not YOLOX) also needs its own decoder in DECODERS below.
+MODELS = {
+    "yolox_tiny": {"file": "yolox_tiny.onnx", "size": 416, "decoder": "yolox"},  # fastest, finds the fewest people
+    "yolox_s": {"file": "yolox_s.onnx", "size": 640, "decoder": "yolox"},  # the default
+    "yolox_m": {"file": "yolox_m.onnx", "size": 640, "decoder": "yolox"},  # finds more people, about 6x slower than yolox_s
+}
+DEFAULT_MODEL = "yolox_s"
+INPUT_SIZE = {name: m["size"] for name, m in MODELS.items()}  # kept for older callers
 PERSON = 0  # class 0 is "person" in the COCO list that YOLOX uses
 SCORE_MIN = 0.35  # how sure the model must be before a box counts
 NMS_IOU = 0.45  # boxes overlapping more than this are treated as the same person
@@ -45,6 +54,22 @@ def decode(raw, size):
     out[..., :2] = (out[..., :2] + grids) * strides
     out[..., 2:4] = np.exp(out[..., 2:4]) * strides
     return out
+
+
+DECODERS = {"yolox": decode}  # decoder name -> function that turns the raw model output into boxes (cx, cy, w, h)
+
+
+def load_model(name=DEFAULT_MODEL):
+    """Open a model from MODELS. Returns (net, size) to pass to find_people / find_people_tiled."""
+    if name not in MODELS:
+        sys.exit(f"Unknown model {name!r}. Choose one of: {', '.join(MODELS)}")
+    info = MODELS[name]
+    if info["decoder"] not in DECODERS:
+        sys.exit(f"Model {name!r} needs the {info['decoder']!r} decoder, which is not available.")
+    path = os.path.join(HERE, "models", info["file"])
+    if not os.path.exists(path):
+        sys.exit(f"The model file is missing: {path}\nDownload it into the models folder (see README.md).")
+    return cv2.dnn.readNetFromONNX(path), info["size"]
 
 
 def find_people(net, img, size):
@@ -114,13 +139,10 @@ def draw(img, people, label):
 def main():
     args = [a for a in sys.argv[1:] if a != "--tiles"]
     tiles = "--tiles" in sys.argv[1:]
-    model = args[0] if args else "yolox_s"
+    model = args[0] if args else DEFAULT_MODEL
     files = args[1:] or sorted(glob.glob(os.path.join(HERE, "images", "*.jpg")))
     tag = model + ("_tiles" if tiles else "")
-    if model not in INPUT_SIZE:
-        sys.exit(f"unknown model {model!r}; choose one of {', '.join(INPUT_SIZE)}")
-    net = cv2.dnn.readNetFromONNX(os.path.join(HERE, "models", model + ".onnx"))
-    size = INPUT_SIZE[model]
+    net, size = load_model(model)
     os.makedirs(os.path.join(HERE, "output"), exist_ok=True)
     results = {}
     for f in files:

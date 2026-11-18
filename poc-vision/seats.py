@@ -35,6 +35,7 @@ BUILT_IN = [
     (9, "Lounge, sofa chair 2", (462, 235), (445, 212, 480, 262)),
 ]
 STANDING_RATIO = 2.2  # a box taller than this many times its width is a standing or walking person
+OVERLAP_MIN = 0.0  # 0 = a seat is taken only when a person's box contains its dot (the original rule); e.g. 0.3 = also when a person's box covers 30% of the seat's box
 MAX_WIDTH = 3000  # pictures wider than this are shrunk before people are looked for (3000 = never: shrinking to 1280 or 1920 changed some seats)
 # The drawing box round a seat saved on the calibration page, as fractions of the picture: left, right, above and below the dot
 BOX_L, BOX_R, BOX_UP, BOX_DOWN = 0.045, 0.045, 0.10, 0.14
@@ -65,11 +66,30 @@ def taken_in(people, anchor):
     return any(seated(p) and p["box"][0] <= ax <= p["box"][2] and p["box"][1] <= ay <= p["box"][3] for p in people)
 
 
+def seat_taken(people, seat, w, h):
+    """One seat on a w x h picture. With OVERLAP_MIN = 0 this is the old dot test; above 0 a seated person's box must also
+    cover at least that share of the seat's drawing box (or contain the dot)."""
+    ax, ay = seat["x"] * w, seat["y"] * h
+    if taken_in(people, (ax, ay)):
+        return True
+    if OVERLAP_MIN <= 0:
+        return False
+    sx0, sy0, sx1, sy1 = seat["box"][0] * w, seat["box"][1] * h, seat["box"][2] * w, seat["box"][3] * h
+    area = max(1.0, (sx1 - sx0) * (sy1 - sy0))
+    for p in people:
+        if not seated(p):
+            continue
+        px0, py0, px1, py1 = p["box"]
+        iw, ih = min(sx1, px1) - max(sx0, px0), min(sy1, py1) - max(sy0, py0)
+        if iw > 0 and ih > 0 and iw * ih / area >= OVERLAP_MIN:
+            return True
+    return False
+
+
 def analyse(frames=FRAMES, seats=None):
     """Look at each frame and decide every seat. Returns (per_frame, result); a seat is taken only if it is taken in all frames."""
     seats = seats if seats is not None else load_seats()
-    net = cv2.dnn.readNetFromONNX(os.path.join(HERE, "models", "yolox_s.onnx"))
-    size = detect.INPUT_SIZE["yolox_s"]
+    net, size = detect.load_model()
     per_frame = []
     for name in frames:
         img = cv2.imread(os.path.join(HERE, "images", name))
@@ -78,7 +98,7 @@ def analyse(frames=FRAMES, seats=None):
             img = cv2.resize(img, None, fx=k, fy=k, interpolation=cv2.INTER_AREA)
         h, w = img.shape[:2]
         people = detect.find_people_tiled(net, img, size)
-        per_frame.append((name, img, people, [taken_in(people, (s["x"] * w, s["y"] * h)) for s in seats]))
+        per_frame.append((name, img, people, [seat_taken(people, s, w, h) for s in seats]))
     result = {"seats": []}
     for k, s in enumerate(seats):
         flags = [f[3][k] for f in per_frame]
